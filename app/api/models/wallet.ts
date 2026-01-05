@@ -2,7 +2,7 @@ import sql from 'mssql';
 import { connectToDB } from '../../lib/db';
 
 export interface Wallet {
-    Id: number;
+    Id: number | null;
     User_Id: number;
     Name: string;
     Description: string;
@@ -17,16 +17,18 @@ export async function addWallet(wallet: Omit<Wallet, 'Id' | 'IsDeleted'>): Promi
     const pool = await connectToDB();
     await pool
         .request()
-        .input('User_Id', wallet.User_Id)
-        .input('Name', wallet.Name)
-        .input('Description', wallet.Description)
-        .input('Currency', wallet.Currency)
-        .input('Balance', wallet.Balance)
-        .input('Date', wallet.Date)
-        .query(
-            `INSERT INTO Wallets (User_Id, Name, Description, Currency, Balance, Date, IsDeleted)
-       VALUES (@User_Id, @Name, @Description, @Currency, @Balance, @Date, 0)`
-        );
+        .input('json_data', JSON.stringify(wallet))
+        // .input('User_Id', wallet.User_Id)
+        // .input('Name', wallet.Name)
+        // .input('Description', wallet.Description)
+        // .input('Currency', wallet.Currency)
+        // .input('Balance', wallet.Balance)
+        // .input('Date', wallet.Date)
+        .execute('[post_wallet]')
+    //     .query(
+    //         `INSERT INTO Wallets (User_Id, Name, Description, Currency, Balance, Date, IsDeleted)
+    //    VALUES (@User_Id, @Name, @Description, @Currency, @Balance, @Date, 0)`
+    //     );
 }
 
 // Options for reactselect
@@ -77,23 +79,8 @@ export async function editWallet(wallet: Omit<Wallet, 'Date' | 'IsDeleted'>): Pr
     const pool = await connectToDB();
     await pool
         .request()
-        .input('Id', wallet.Id)
-        .input('User_Id', wallet.User_Id)
-        .input('Name', wallet.Name)
-        .input('Description', wallet.Description)
-        .input('Currency', wallet.Currency)
-        .input('Balance', wallet.Balance)
-        .query(
-            `UPDATE Wallets
-            SET
-                Name = @Name,
-                Description = @Description,
-                Currency = @Currency,
-                Balance = @Balance
-            WHERE Id = @Id
-            AND User_Id = @User_Id
-            AND IsDeleted = 0;`
-        );
+        .input('json_data', JSON.stringify(wallet))
+        .execute('[post_wallet]');
 }
 
 // Delete Wallet

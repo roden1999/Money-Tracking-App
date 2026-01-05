@@ -2,6 +2,7 @@ import { addWallet, optionsWallet, listAllWallet, listSearchedWallet, editWallet
 
 
 interface WalletInput {
+    Id: number | null;
     User_Id: number;
     Name: string;
     Description: string;
@@ -24,21 +25,15 @@ interface EditWalletInput {
     Balance: number;
 }
 
-export async function addWalletService(input: WalletInput) {
-    const { User_Id, Name, Description, Currency, Balance, Date } = input;
+export async function addWalletService(inputs: WalletInput) {
+    const { User_Id, Name, Description, Currency, Balance, Date } = inputs;
 
     if (!User_Id || !Name || !Currency || !Balance || !Date) {
+        console.log(inputs)
         throw new Error('Missing required fields');
     }
 
-    await addWallet({
-        User_Id,
-        Name,
-        Description: Description || '',
-        Currency,
-        Balance,
-        Date,
-    });
+    await addWallet(inputs);
 }
 
 export async function optionsWalletService(Id: number) {
@@ -62,25 +57,19 @@ export async function listWalletService(input: SearchDataInput) {
     }
 }
 
-export async function editWalletService(input: EditWalletInput) {
-    const { Id, User_Id, Name, Description, Currency, Balance } = input;
+export async function editWalletService(inputs: WalletInput) {
+    const { Id, User_Id, Name, Description, Currency, Balance } = inputs;
 
     if (!Id || !User_Id || !Name || !Currency || !Balance) {
-        throw new Error('User Id is required!');
+        throw new Error('Missing required fields!');
     }
 
-    await editWallet({
-        Id,
-        User_Id,
-        Name,
-        Description: Description || '',
-        Currency,
-        Balance,
-    });
+    await editWallet(inputs);
 }
 
 export async function deleteWalletService(Id: number) {
     if (!Id) {
+        console.log(Id);
         throw new Error('User Id is required!');
     }
 

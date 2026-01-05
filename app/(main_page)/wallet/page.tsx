@@ -7,64 +7,88 @@ import toast from 'react-hot-toast';
 
 interface Wallet {
     Id: number,
+    User_Id: number,
     Name: string,
     Description: string,
     Currency: string,
     Balance: number,
-    Date: Date
+    Date: string
 }
+
+type WALLET_INPUT = {
+    Id: number | null,
+    User_Id: number | null,
+    Name: string,
+    Description: string,
+    Currency: string,
+    Balance: number,
+    Date: string
+}
+
+const initialWalletInput: WALLET_INPUT = {
+    Id: null,
+    User_Id: null,
+    Name: "",
+    Description: "",
+    Currency: "PHP",
+    Balance: 0,
+    Date: ""
+};
 
 export default function WalletPage() {
     const [wallets, setWallets] = useState<Wallet[]>([]);
-    const [showModal, setShowModal] = useState(false);
+    const [walletInput, setWalletInput] = useState(initialWalletInput);
     const [walletOptions, setWalletOptions] = useState<{ value: number; label: string }[]>([]);
     const [selectedWallet, setSelectedWallet] = useState<MultiValue<{ value: number; label: string }>>([]);
-    const [name, setName] = useState('');
-    const [description, setDescription] = useState('');
-    const [currency, setCurrency] = useState('₱');
-    const [balance, setBalance] = useState<number | ''>('');
-    const [dateValue, setDateValue] = useState('');
+
+    const [showModal, setShowModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+
     const [editingWalletId, setEditingWalletId] = useState<number | null>(null);
+
+    const [loaded, setLoaded] = useState(false);
     const [loader, setLoader] = useState(false);
     const [error, setError] = useState('');
 
-    const currencyOptions = ['₱', '$', '€', '£', '¥'];
+    const currencyOptions = ['PHP', 'USD', 'EUR', 'GBP', 'JPY'];
 
     useEffect(() => {
-        const fetchWalletData = async () => {
-            setLoader(true);
-            setError('');
+        if (!loaded) {
+            const user = JSON.parse(localStorage.getItem("user") || "{}");
+            const fetchWalletData = async () => {
+                setLoader(true);
+                setError('');
 
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
-            try {
-                const walletIds = selectedWallet.map((x) => x.value);
+                try {
+                    const walletIds = selectedWallet.map((x) => x.value);
 
-                const res = await fetch('/api/routes/wallet_view/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ Ids: walletIds, User_Id: user.id }),
-                });
+                    const res = await fetch('/api/routes/wallet/list/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ Ids: walletIds, User_Id: user.id }),
+                    });
 
-                if (!res.ok) {
+                    if (!res.ok) {
+                        const data = await res.json();
+                        throw new Error(data.message || 'Failed to fetch wallet data');
+                    }
+
                     const data = await res.json();
-                    throw new Error(data.message || 'Failed to fetch wallet data');
+
+                    setWallets(data.result instanceof Array ? data.result : [data.result]);
+
+                    setLoaded(true);
+
+                } catch (err: any) {
+                    setError(err.message || 'Something went wrong');
+                } finally {
+                    setLoader(false);
                 }
-
-                const data = await res.json();
-
-                setWallets(data.result instanceof Array ? data.result : [data.result]);
-
-            } catch (err: any) {
-                setError(err.message || 'Something went wrong');
-            } finally {
-                setLoader(false);
-            }
-        };
-
-        fetchWalletData();
-    }, [selectedWallet]);
+            };
+            fetchWalletData();
+        }
+    }, [selectedWallet, loaded]);
 
     useEffect(() => {
         const fetchWallets = async () => {
@@ -72,7 +96,7 @@ export default function WalletPage() {
             setError('');
             try {
                 const user = JSON.parse(localStorage.getItem('user') || '{}');
-                const res = await fetch('/api/routes/wallet_options', {
+                const res = await fetch('/api/routes/wallet/options/', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ Id: user.id })
@@ -99,25 +123,24 @@ export default function WalletPage() {
         };
 
         fetchWallets();
-    }, []);
+    }, [loaded]);
 
     const handleAddWallet = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoader(true);
+
         const user = JSON.parse(localStorage.getItem("user") || "{}");
-        console.log(user);
+
+        setWalletInput(prev => ({
+            ...prev,
+            ["User_Id"]: user.id
+        }));
+        // console.log(walletInput);
         try {
-            const res = await fetch('/api/routes/wallet_add', {
+            const res = await fetch('/api/routes/wallet/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    User_Id: user.id,
-                    Name: name,
-                    Description: description,
-                    Currency: currency,
-                    Balance: balance,
-                    Date: dateValue,
-                }),
+                body: JSON.stringify(walletInput),
             });
 
             const data = await res.json();
@@ -128,14 +151,13 @@ export default function WalletPage() {
                 return;
             }
 
-            setShowModal(false);
-            setName('');
-            setCurrency('₱');
-            setBalance('');
-            setDateValue('');
-            setError('');
-
             toast.success('Wallet added successfully!');
+            setShowModal(false);
+            setWalletInput(initialWalletInput);
+
+            // Refresh list
+            setSelectedWallet([...selectedWallet]);
+
         } catch {
             setError('Something went wrong');
         } finally {
@@ -149,21 +171,12 @@ export default function WalletPage() {
 
         setLoader(true);
         setError('');
-
+        console.log(walletInput);
         try {
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
-
-            const res = await fetch('/api/routes/wallet_edit', {
-                method: 'POST',
+            const res = await fetch('/api/routes/wallet/', {
+                method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    Id: editingWalletId,
-                    User_Id: user.id,
-                    Name: name,
-                    Description: description,
-                    Currency: currency,
-                    Balance: balance,
-                }),
+                body: JSON.stringify(walletInput),
             });
 
             const data = await res.json();
@@ -174,6 +187,7 @@ export default function WalletPage() {
 
             toast.success('Wallet updated successfully!');
             setShowEditModal(false);
+            setWalletInput(initialWalletInput);
 
             // Refresh list
             setSelectedWallet([...selectedWallet]);
@@ -186,18 +200,14 @@ export default function WalletPage() {
     };
 
     const handleConfirmDelete = async () => {
-        if (!editingWalletId) return;
-
         setLoader(true);
         setError('');
 
         try {
-            const res = await fetch('/api/routes/wallet_delete/', {
-                method: 'POST',
+            const res = await fetch('/api/routes/wallet/', {
+                method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    Id: editingWalletId,
-                }),
+                body: JSON.stringify(walletInput),
             });
 
             const data = await res.json();
@@ -209,10 +219,12 @@ export default function WalletPage() {
             // Remove from UI immediately
             setWallets((prev) => prev.filter(w => w.Id !== editingWalletId));
 
+            // Refresh list
+            setSelectedWallet([...selectedWallet]);
+
             toast.success('Wallet deleted successfully');
             setShowDeleteModal(false);
-            setEditingWalletId(null);
-
+            setWalletInput(initialWalletInput);
         } catch (err: any) {
             setError(err.message || 'Something went wrong');
         } finally {
@@ -220,29 +232,31 @@ export default function WalletPage() {
         }
     };
 
-    const openDeleteModal = (id: number) => {
-        setEditingWalletId(id);
-        setShowDeleteModal(true);
-    };
-
 
     const closeModal = () => {
         setShowModal(false);
-        setName('');
-        setCurrency('₱');
-        setBalance('');
-        setDateValue('');
+        setShowEditModal(false);
+        setShowDeleteModal(false);
+        setWalletInput(initialWalletInput);
         setError('');
     }
 
     const openEditModal = (wallet: Wallet) => {
-        setEditingWalletId(wallet.Id);
-        setName(wallet.Name);
-        setDescription(wallet.Description);
-        setCurrency(wallet.Currency);
-        setBalance(wallet.Balance);
+        setWalletInput(wallet);
         setShowEditModal(true);
     };
+
+    const openDeleteModal = (wallet: Wallet) => {
+        setWalletInput(wallet);
+        setShowDeleteModal(true);
+    };
+
+    const handleInputChange = (e: any, prop: string) => {
+        setWalletInput(prev => ({
+            ...prev,
+            [prop]: e.target.value
+        }));
+    }
 
     return (
         <div className="min-h-screen bg-gray-100 p-6 antialiased">
@@ -323,27 +337,27 @@ export default function WalletPage() {
 
                 {/* WALLET CARDS */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {wallets.map((wallet) => (
+                    {wallets.map((x) => (
                         <div
-                            key={wallet.Id}
+                            key={x.Id}
                             className="bg-white rounded-xl shadow p-6 flex flex-col justify-between antialiased"
                         >
                             <div>
-                                <h2 className="text-lg font-semibold mb-2 text-gray-700">{wallet.Name}</h2>
-                                <p className="text-gray-500 mb-1">Description: {wallet.Description}</p>
-                                <p className="text-gray-500 mb-1">Currency: {wallet.Currency}</p>
+                                <h2 className="text-lg font-semibold mb-2 text-gray-700">{x.Name}</h2>
+                                <p className="text-gray-500 mb-1">Description: {x.Description}</p>
+                                <p className="text-gray-500 mb-1">Currency: {x.Currency}</p>
                                 <p className="text-gray-700 font-medium mb-2">
-                                    Balance: {wallet.Currency} {wallet.Balance.toLocaleString()}
+                                    Balance: {x.Currency + " " + x.Balance.toLocaleString()}
                                 </p>
-                                <p className="text-sm text-gray-400">{wallet.Date.toString()}</p>
+                                <p className="text-sm text-gray-400">{x.Date.toString()}</p>
                             </div>
                             <div className="flex gap-2 mt-4">
-                                <button onClick={() => openEditModal(wallet)}
+                                <button onClick={() => openEditModal(x)}
                                     className="flex-1 bg-gray-600 text-white py-1 rounded-lg hover:bg-gray-700 transition">
                                     Edit
                                 </button>
                                 <button
-                                    onClick={() => openDeleteModal(wallet.Id)}
+                                    onClick={() => openDeleteModal(x)}
                                     className="flex-1 bg-red-500 text-white py-1 rounded-lg hover:bg-red-600 transition"
                                 >
                                     Delete
@@ -373,21 +387,21 @@ export default function WalletPage() {
                             <input
                                 type="text"
                                 placeholder="Wallet Name"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
+                                defaultValue={walletInput.Name}
+                                onChange={(e) => handleInputChange(e, "Name")}
                                 required
                                 className="border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-900 antialiased"
                             />
                             <input
                                 type="text"
                                 placeholder="Description (optional)"
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
+                                defaultValue={walletInput.Description}
+                                onChange={(e) => handleInputChange(e, "Description")}
                                 className="border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-900 antialiased"
                             />
                             <select
-                                value={currency}
-                                onChange={(e) => setCurrency(e.target.value)}
+                                defaultValue={walletInput.Currency}
+                                onChange={(e) => handleInputChange(e, "Currency")}
                                 className="border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-900 antialiased"
                             >
                                 {currencyOptions.map((c) => (
@@ -399,15 +413,15 @@ export default function WalletPage() {
                             <input
                                 type="number"
                                 placeholder="Balance"
-                                value={balance}
-                                onChange={(e) => setBalance(Number(e.target.value))}
+                                defaultValue={walletInput.Balance}
+                                onChange={(e) => handleInputChange(e, "Balance")}
                                 required
                                 className="border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-900 antialiased"
                             />
                             <input
                                 type="date"
-                                value={dateValue}
-                                onChange={(e) => setDateValue(e.target.value)}
+                                defaultValue={walletInput.Date}
+                                onChange={(e) => handleInputChange(e, "Date")}
                                 className="border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-900 antialiased"
                             />
 
@@ -450,41 +464,43 @@ export default function WalletPage() {
                         <form onSubmit={handleEditWallet} className="flex flex-col gap-3">
                             <input
                                 type="text"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
+                                placeholder="Wallet Name"
+                                defaultValue={walletInput.Name}
+                                onChange={(e) => handleInputChange(e, "Name")}
                                 required
-                                className="border px-3 py-2 rounded-lg text-gray-900"
+                                className="border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-900 antialiased"
                             />
-
                             <input
                                 type="text"
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                                className="border px-3 py-2 rounded-lg text-gray-900"
+                                placeholder="Description (optional)"
+                                defaultValue={walletInput.Description}
+                                onChange={(e) => handleInputChange(e, "Description")}
+                                className="border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-900 antialiased"
                             />
-
                             <select
-                                value={currency}
-                                onChange={(e) => setCurrency(e.target.value)}
-                                className="border px-3 py-2 rounded-lg text-gray-900"
+                                defaultValue={walletInput.Currency}
+                                onChange={(e) => handleInputChange(e, "Currency")}
+                                className="border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-900 antialiased"
                             >
                                 {currencyOptions.map((c) => (
-                                    <option key={c} value={c}>{c}</option>
+                                    <option key={c} value={c}>
+                                        {c}
+                                    </option>
                                 ))}
                             </select>
-
                             <input
                                 type="number"
-                                value={balance}
-                                onChange={(e) => setBalance(Number(e.target.value))}
+                                placeholder="Balance"
+                                defaultValue={walletInput.Balance}
+                                onChange={(e) => handleInputChange(e, "Balance")}
                                 required
-                                className="border px-3 py-2 rounded-lg text-gray-900"
+                                className="border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-900 antialiased"
                             />
 
                             <div className="mt-4 flex justify-end gap-2">
                                 <button
                                     type="button"
-                                    onClick={() => setShowEditModal(false)}
+                                    onClick={closeModal}
                                     className="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-400 transition"
                                 >
                                     Cancel
@@ -511,10 +527,10 @@ export default function WalletPage() {
                         </h2>
 
                         <p className="text-sm text-gray-600 mb-4">
-                            Are you sure you want to delete this wallet my homie?
+                            Are you sure you want to delete this wallet?
                             <br />
                             <span className="text-red-500 font-medium">
-                                This action cannot be undone yah.
+                                This action cannot be undone.
                             </span>
                         </p>
 
@@ -526,10 +542,7 @@ export default function WalletPage() {
 
                         <div className="flex justify-end gap-2">
                             <button
-                                onClick={() => {
-                                    setShowDeleteModal(false);
-                                    setEditingWalletId(null);
-                                }}
+                                onClick={closeModal}
                                 className="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-400 transition"
                             >
                                 Cancel
@@ -540,7 +553,7 @@ export default function WalletPage() {
                                 disabled={loader}
                                 className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
                             >
-                                Yes, Delete
+                                Delete
                             </button>
                         </div>
                     </div>
