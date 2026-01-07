@@ -1,4 +1,4 @@
-import { addWallet, optionsWallet, listAllWallet, listSearchedWallet, editWallet, deleteWallet } from "../models/wallet";
+import { addWallet, optionsWallet, listWallet, listAllWallet, listSearchedWallet, editWallet, deleteWallet } from "../models/wallet";
 
 
 interface WalletInput {
@@ -11,7 +11,7 @@ interface WalletInput {
     Date: Date;
 }
 
-interface SearchDataInput {
+interface SearchedDataInput {
     Ids?: number[];
     User_Id: number;
 }
@@ -41,20 +41,24 @@ export async function optionsWalletService(Id: number) {
     return { result };
 }
 
-export async function listWalletService(input: SearchDataInput) {
+export async function listWalletService(input: SearchedDataInput) {
     const { Ids = [], User_Id } = input;
 
     if (!User_Id) {
         throw new Error('User Id is required!');
     }
+    
+    const result = await listWallet(input);
+    console.log("Debug: ", result);
+    return { result };
 
-    if (Ids.length === 0) {
-        const result = await listAllWallet(User_Id);
-        return { result };
-    } else {
-        const result = await listSearchedWallet(Ids);
-        return { result };
-    }
+    // if (Ids.length === 0) {
+    //     const result = await listAllWallet(User_Id);
+    //     return { result };
+    // } else {
+    //     const result = await listSearchedWallet(Ids);
+    //     return { result };
+    // }
 }
 
 export async function editWalletService(inputs: WalletInput) {

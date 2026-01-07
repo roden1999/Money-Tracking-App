@@ -12,6 +12,8 @@ interface Wallet {
     Description: string,
     Currency: string,
     Balance: number,
+    TotalIncome: number,
+    TotalExpense: number,
     Date: string
 }
 
@@ -75,6 +77,7 @@ export default function WalletPage() {
                     }
 
                     const data = await res.json();
+                    console.log(data.result);
 
                     setWallets(data.result instanceof Array ? data.result : [data.result]);
 
@@ -156,7 +159,7 @@ export default function WalletPage() {
             setWalletInput(initialWalletInput);
 
             // Refresh list
-            setSelectedWallet([...selectedWallet]);
+            setLoaded(false);
 
         } catch {
             setError('Something went wrong');
@@ -167,7 +170,6 @@ export default function WalletPage() {
 
     const handleEditWallet = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!editingWalletId) return;
 
         setLoader(true);
         setError('');
@@ -190,7 +192,7 @@ export default function WalletPage() {
             setWalletInput(initialWalletInput);
 
             // Refresh list
-            setSelectedWallet([...selectedWallet]);
+            setLoaded(false);
 
         } catch (err: any) {
             setError(err.message || 'Something went wrong');
@@ -216,11 +218,8 @@ export default function WalletPage() {
                 throw new Error(data.message || 'Delete failed');
             }
 
-            // Remove from UI immediately
-            setWallets((prev) => prev.filter(w => w.Id !== editingWalletId));
-
             // Refresh list
-            setSelectedWallet([...selectedWallet]);
+            setLoaded(false)
 
             toast.success('Wallet deleted successfully');
             setShowDeleteModal(false);
@@ -258,6 +257,11 @@ export default function WalletPage() {
         }));
     }
 
+    const handleSearchWallet = (e: MultiValue<{ value: number; label: string }>) => {
+        setSelectedWallet(e);
+        setLoaded(false);
+    }
+
     return (
         <div className="min-h-screen bg-gray-100 p-6 antialiased">
             <div className="mx-auto max-w-7xl space-y-6 bg-gray-50 p-6">
@@ -279,7 +283,7 @@ export default function WalletPage() {
                             <Select
                                 defaultValue={selectedWallet}
                                 options={walletOptions}
-                                onChange={(e) => setSelectedWallet(e)}
+                                onChange={(e) => handleSearchWallet(e)}
                                 placeholder="Search..."
                                 isClearable
                                 isMulti
@@ -337,34 +341,107 @@ export default function WalletPage() {
 
                 {/* WALLET CARDS */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {wallets.map((x) => (
-                        <div
-                            key={x.Id}
-                            className="bg-white rounded-xl shadow p-6 flex flex-col justify-between antialiased"
-                        >
-                            <div>
-                                <h2 className="text-lg font-semibold mb-2 text-gray-700">{x.Name}</h2>
-                                <p className="text-gray-500 mb-1">Description: {x.Description}</p>
-                                <p className="text-gray-500 mb-1">Currency: {x.Currency}</p>
-                                <p className="text-gray-700 font-medium mb-2">
-                                    Balance: {x.Currency + " " + x.Balance.toLocaleString()}
-                                </p>
-                                <p className="text-sm text-gray-400">{x.Date.toString()}</p>
-                            </div>
-                            <div className="flex gap-2 mt-4">
-                                <button onClick={() => openEditModal(x)}
-                                    className="flex-1 bg-gray-600 text-white py-1 rounded-lg hover:bg-gray-700 transition">
-                                    Edit
-                                </button>
-                                <button
-                                    onClick={() => openDeleteModal(x)}
-                                    className="flex-1 bg-red-500 text-white py-1 rounded-lg hover:bg-red-600 transition"
-                                >
-                                    Delete
-                                </button>
-                            </div>
+                    {wallets?.length > 0 &&
+                        wallets
+                            .filter(w => w && w.Id) // ⛔ prevents ghost/undefined cards
+                            .map((x) => {
+                                const initial = Number(x.Balance ?? 0);
+                                const income = Number(x.TotalIncome ?? 0);
+                                const expense = Number(x.TotalExpense ?? 0);
+                                const total = initial + income - expense;
+
+                                return (
+                                    <div
+                                        key={x.Id}
+                                        className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col justify-between hover:shadow-md transition"
+                                    >
+                                        {/* Header */}
+                                        <div className="mb-4">
+                                            <h2 className="text-xl font-semibold text-gray-800 truncate">
+                                                {x.Name || "Unnamed Wallet"}
+                                            </h2>
+                                            {x.Description && (
+                                                <p className="text-sm text-gray-500 mt-1">
+                                                    {x.Description}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        {/* Details */}
+                                        <div className="space-y-2 text-sm">
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-500">Currency</span>
+                                                <span className="font-medium text-gray-700">{x.Currency}</span>
+                                            </div>
+
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-500">Initial Balance</span>
+                                                <span className="font-semibold text-gray-800">
+                                                    {x.Currency} {initial.toLocaleString()}
+                                                </span>
+                                            </div>
+
+                                            <div className="flex justify-between text-green-600">
+                                                <span>Income</span>
+                                                <span className="font-medium">
+                                                    {x.Currency} {income.toLocaleString()}
+                                                </span>
+                                            </div>
+
+                                            <div className="flex justify-between text-red-500">
+                                                <span>Expenses</span>
+                                                <span className="font-medium">
+                                                    {x.Currency} {expense.toLocaleString()}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* TOTAL */}
+                                        <div className="mt-4 pt-4 border-t">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-sm font-semibold text-gray-600">
+                                                    Total Balance
+                                                </span>
+                                                <span
+                                                    className={`text-lg font-bold ${total >= 0 ? "text-green-700" : "text-red-600"
+                                                        }`}
+                                                >
+                                                    {x.Currency} {total.toLocaleString()}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Footer */}
+                                        <div className="mt-5">
+                                            <p className="text-xs text-gray-400 mb-3">
+                                                Created: {x.Date ? new Date(x.Date).toLocaleDateString() : "-"}
+                                            </p>
+
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => openEditModal(x)}
+                                                    className="flex-1 bg-gray-700 text-white py-2 rounded-lg text-sm hover:bg-gray-800 transition"
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    onClick={() => openDeleteModal(x)}
+                                                    className="flex-1 bg-red-500 text-white py-2 rounded-lg text-sm hover:bg-red-600 transition"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+
+                    {/* Empty state */}
+                    {wallets?.length === 0 && (
+                        <div className="col-span-full text-center text-gray-400 py-10">
+                            No wallets found.
                         </div>
-                    ))}
+                    )}
                 </div>
             </div>
 

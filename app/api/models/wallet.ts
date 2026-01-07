@@ -12,6 +12,11 @@ export interface Wallet {
     IsDeleted: boolean;
 }
 
+interface SearchedData {
+    Ids?: number[];
+    User_Id: number;
+}
+
 // Add wallet
 export async function addWallet(wallet: Omit<Wallet, 'Id' | 'IsDeleted'>): Promise<void> {
     const pool = await connectToDB();
@@ -45,15 +50,47 @@ export async function optionsWallet(Id: number) {
 }
 
 // List all wallet
+export async function listWallet(data: SearchedData) {
+    const pool = await connectToDB();
+   
+    const result = await pool
+        .request()
+        .input('json_data', JSON.stringify(data))
+        .execute('[get_wallets]');
+  
+    return result.recordset;
+}
+
 export async function listAllWallet(Id: number) {
     const pool = await connectToDB();
     const result = await pool
         .request()
         .input('Id', Id)
         .query<Wallet>(
-            `SELECT * FROM Wallets WHERE User_Id = @Id AND IsDeleted = 0`
+            `SELECT 
+                w.Id,
+                w.Name,
+                w.User_Id,
+                w.Description,
+                w.Currency,
+                w.Balance,
+                w.Date,
+                SUM(CASE WHEN t.Type = 'Income'  THEN t.Amount ELSE 0 END) AS TotalIncome,
+                SUM(CASE WHEN t.Type = 'Expense' THEN t.Amount ELSE 0 END) AS TotalExpense
+            FROM Wallets w
+            LEFT JOIN Transactions t
+              ON w.id = t.Wallet_Id
+              AND t.IsDeleted = 0
+            WHERE w.User_Id = @Id AND w.IsDeleted = 0
+            GROUP BY
+                w.Id,
+                w.Name,
+                w.User_Id,
+                w.Description,
+                w.Currency,
+                w.Balance,
+                w.Date;`
         );
-
     return result.recordset;
 }
 
@@ -68,7 +105,8 @@ export async function listSearchedWallet(Ids: number[]) {
         request.input(`Id${i}`, id);
     });
 
-    const query = `SELECT * FROM Wallets WHERE Id IN (${inputParams}) AND IsDeleted = 0`;
+    // const query = `SELECT * FROM Wallets WHERE Id IN (${inputParams}) AND IsDeleted = 0`;
+    const query = `SELECT * FROM Wallets WHERE Id IN (SELECT value FROM OPENJSON(${inputParams})) AND IsDeleted = 0`;
     const result = await request.query<Wallet>(query);
 
     return result.recordset;
