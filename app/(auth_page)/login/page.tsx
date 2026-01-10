@@ -3,11 +3,19 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+interface User {
+  UserName: string,
+  Password: string
+}
+
+const USER_DATA = {
+  UserName: "",
+  Password: ""
+}
+
 export default function LoginPage() {
   const router = useRouter();
-
-  const [UserName, setUserName] = useState('');
-  const [Password, setPassword] = useState('');
+  const [userCredentials, setUserCredentials] = useState<User>(USER_DATA);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -20,7 +28,7 @@ export default function LoginPage() {
       const res = await fetch('/api/routes/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ UserName, Password }),
+        body: JSON.stringify(userCredentials),
       });
 
       const data = await res.json();
@@ -39,6 +47,13 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  const handleChangeInput = (e: any, props: string) => {
+      setUserCredentials(prev => ({
+        ...prev,
+        [props]: e.target.value
+      }));
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-black antialiased">
@@ -70,8 +85,8 @@ export default function LoginPage() {
             </label>
             <input
               type="text"
-              value={UserName}
-              onChange={(e) => setUserName(e.target.value)}
+              defaultValue={userCredentials.UserName}
+              onChange={(e) => handleChangeInput(e, "UserName")}
               required
               placeholder="Enter your username"
               className="w-full px-4 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -84,8 +99,8 @@ export default function LoginPage() {
             </label>
             <input
               type="password"
-              value={Password}
-              onChange={(e) => setPassword(e.target.value)}
+              defaultValue={userCredentials.Password}
+              onChange={(e) => handleChangeInput(e, "Password")}
               required
               placeholder="••••••••"
               className="w-full px-4 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
