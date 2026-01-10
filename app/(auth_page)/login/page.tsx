@@ -55,7 +55,7 @@ export default function LoginPage() {
           </h1>
 
           <p className="text-sm text-gray-600 text-center mb-6">
-            Whats up sayo sah 👋
+            Whats up let's save some money 👋
           </p>
 
           {error && (
