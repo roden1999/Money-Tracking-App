@@ -2,16 +2,30 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
+
+interface User {
+  UserName: string,
+  FirstName: string,
+  MiddleName: string,
+  LastName: string,
+  Email: string,
+  Password: string
+}
+
+const USER_INPUT = {
+  UserName: "",
+  FirstName: "",
+  MiddleName: "",
+  LastName: "",
+  Email: "",
+  Password: ""
+}
 
 export default function RegisterPage() {
   const router = useRouter();
-
-  const [UserName, setUserName] = useState('');
-  const [FirstName, setFirstName] = useState('');
-  const [MiddleName, setMiddleName] = useState('');
-  const [LastName, setLastName] = useState('');
-  const [Email, setEmail] = useState('');
-  const [Password, setPassword] = useState('');
+  const [userInput, setUserInput] = useState<User>(USER_INPUT);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -24,14 +38,7 @@ export default function RegisterPage() {
       const res = await fetch('/api/routes/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          UserName,
-          FirstName,
-          MiddleName,
-          LastName,
-          Email,
-          Password,
-        }),
+        body: JSON.stringify(userInput),
       });
 
       const data = await res.json();
@@ -41,6 +48,8 @@ export default function RegisterPage() {
         return;
       }
 
+      toast.success('Account registered successfully!');
+
       router.replace('/login');
     } catch {
       setError('Something went wrong');
@@ -49,8 +58,16 @@ export default function RegisterPage() {
     }
   };
 
+  const handleInputChange = (e: any, props: string) => {
+    setUserInput(prev => ({
+      ...prev,
+      [props]: e.target.value
+    }));
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-black antialiased">
+      <Toaster position="top-right" reverseOrder={false} />
       <div className="relative w-full max-w-lg">
         {/* Glow */}
         <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-600 opacity-30 blur-xl" />
@@ -78,8 +95,8 @@ export default function RegisterPage() {
             <input
               type="text"
               placeholder="First Name"
-              value={FirstName}
-              onChange={(e) => setFirstName(e.target.value)}
+              defaultValue={userInput.FirstName}
+              onChange={(e) => handleInputChange(e, "FirstName")}
               required
               className="input"
             />
@@ -87,8 +104,8 @@ export default function RegisterPage() {
             <input
               type="text"
               placeholder="Last Name"
-              value={LastName}
-              onChange={(e) => setLastName(e.target.value)}
+              defaultValue={userInput.LastName}
+              onChange={(e) => handleInputChange(e, "LastName")}
               required
               className="input"
             />
@@ -97,16 +114,16 @@ export default function RegisterPage() {
           <input
             type="text"
             placeholder="Middle Name (optional)"
-            value={MiddleName}
-            onChange={(e) => setMiddleName(e.target.value)}
+            defaultValue={userInput.MiddleName}
+            onChange={(e) => handleInputChange(e, "MiddleName")}
             className="input mb-4"
           />
 
           <input
             type="text"
             placeholder="Username"
-            value={UserName}
-            onChange={(e) => setUserName(e.target.value)}
+            defaultValue={userInput.UserName}
+            onChange={(e) => handleInputChange(e, "UserName")}
             required
             className="input mb-4"
           />
@@ -114,8 +131,8 @@ export default function RegisterPage() {
           <input
             type="email"
             placeholder="Email"
-            value={Email}
-            onChange={(e) => setEmail(e.target.value)}
+            defaultValue={userInput.Email}
+            onChange={(e) => handleInputChange(e, "Email")}
             required
             className="input mb-4"
           />
@@ -123,8 +140,8 @@ export default function RegisterPage() {
           <input
             type="password"
             placeholder="Password"
-            value={Password}
-            onChange={(e) => setPassword(e.target.value)}
+            defaultValue={userInput.Password}
+            onChange={(e) => handleInputChange(e, "Password")}
             required
             className="input mb-6"
           />
