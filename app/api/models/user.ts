@@ -27,18 +27,10 @@ export async function findUserByEmailOrUsername(email: string, username: string)
 }
 
 // Create a new user
-export async function createUser(user: Omit<User, 'Id' | 'IsDeleted'>): Promise<void> {
+export async function createUser(data: Omit<User, 'Id' | 'IsDeleted'>) {
     const pool = await connectToDB();
     await pool
         .request()
-        .input('UserName', user.UserName)
-        .input('FirstName', user.FirstName)
-        .input('MiddleName', user.MiddleName || '')
-        .input('LastName', user.LastName || '')
-        .input('Email', user.Email)
-        .input('Password', user.Password)
-        .query(
-            `INSERT INTO Users (UserName, FirstName, MiddleName, LastName, Email, Password, IsDeleted)
-       VALUES (@UserName, @FirstName, @MiddleName, @LastName, @Email, CONVERT(VARBINARY(MAX), @Password), 0)`
-        );
+        .input('json_data', JSON.stringify(data))
+        .execute('[post_user]');
 }

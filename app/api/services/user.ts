@@ -24,9 +24,9 @@ export function authenticate(req: NextApiRequest, res: NextApiResponse) {
 
 interface RegisterInput {
   UserName: string;
-  FirstName?: string;
-  MiddleName?: string;
-  LastName?: string;
+  FirstName: string;
+  MiddleName: string;
+  LastName: string;
   Email: string;
   Password: string;
 }
@@ -38,7 +38,7 @@ interface LoginInput {
 
 export async function registerUserService(input: RegisterInput) {
   const { UserName, FirstName, MiddleName, LastName, Email, Password } = input;
-
+  console.log(input);
   if (!UserName || !Email || !Password) {
     throw new Error('Missing required fields');
   }
@@ -50,14 +50,8 @@ export async function registerUserService(input: RegisterInput) {
 
   const hashedPassword = await bcrypt.hash(Password, 10);
 
-  await createUser({
-    UserName,
-    FirstName: FirstName || '',
-    MiddleName: MiddleName || '',
-    LastName: LastName || '',
-    Email,
-    Password: hashedPassword,
-  });
+  const result = await createUser(input);
+  return { result }
 }
 
 export async function loginUserService(input: LoginInput) {
