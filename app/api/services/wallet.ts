@@ -1,4 +1,4 @@
-import { addWallet, optionsWallet, listWallet, listAllWallet, listSearchedWallet, editWallet, deleteWallet } from "../models/wallet";
+import { addWallet, optionsWallet, listWallet, editWallet, deleteWallet } from "../models/wallet";
 
 
 interface WalletInput {

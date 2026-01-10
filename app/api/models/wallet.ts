@@ -49,7 +49,7 @@ export async function optionsWallet(Id: number) {
     return result.recordset;
 }
 
-// List all wallet
+// List wallet
 export async function listWallet(data: SearchedData) {
     const pool = await connectToDB();
    
@@ -58,57 +58,6 @@ export async function listWallet(data: SearchedData) {
         .input('json_data', JSON.stringify(data))
         .execute('[get_wallets]');
   
-    return result.recordset;
-}
-
-export async function listAllWallet(Id: number) {
-    const pool = await connectToDB();
-    const result = await pool
-        .request()
-        .input('Id', Id)
-        .query<Wallet>(
-            `SELECT 
-                w.Id,
-                w.Name,
-                w.User_Id,
-                w.Description,
-                w.Currency,
-                w.Balance,
-                w.Date,
-                SUM(CASE WHEN t.Type = 'Income'  THEN t.Amount ELSE 0 END) AS TotalIncome,
-                SUM(CASE WHEN t.Type = 'Expense' THEN t.Amount ELSE 0 END) AS TotalExpense
-            FROM Wallets w
-            LEFT JOIN Transactions t
-              ON w.id = t.Wallet_Id
-              AND t.IsDeleted = 0
-            WHERE w.User_Id = @Id AND w.IsDeleted = 0
-            GROUP BY
-                w.Id,
-                w.Name,
-                w.User_Id,
-                w.Description,
-                w.Currency,
-                w.Balance,
-                w.Date;`
-        );
-    return result.recordset;
-}
-
-// List searched wallet
-export async function listSearchedWallet(Ids: number[]) {
-    const pool = await connectToDB();
-    // Build a parameterized query for safety
-    const inputParams = Ids.map((_, i) => `@Id${i}`).join(', ');
-    const request = pool.request();
-
-    Ids.forEach((id, i) => {
-        request.input(`Id${i}`, id);
-    });
-
-    // const query = `SELECT * FROM Wallets WHERE Id IN (${inputParams}) AND IsDeleted = 0`;
-    const query = `SELECT * FROM Wallets WHERE Id IN (SELECT value FROM OPENJSON(${inputParams})) AND IsDeleted = 0`;
-    const result = await request.query<Wallet>(query);
-
     return result.recordset;
 }
 
@@ -127,11 +76,5 @@ export async function deleteWallet(Id: number) {
     await pool
         .request()
         .input('Id', Id)
-        .query(
-            `UPDATE Wallets
-            SET
-                IsDeleted = 1
-            WHERE Id = @Id
-            AND IsDeleted = 0;`
-        );
+        .execute('[delete_wallet]');
 }
