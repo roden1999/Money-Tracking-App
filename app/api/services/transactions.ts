@@ -1,4 +1,4 @@
-import { addTransactions, optionsTransactions, listAllTransactions, listSearchedTransactions, editTransactions, deleteTransaction } from "../models/transactions";
+import { addTransactions, editTransactions, deleteTransaction, listTransactions } from "../models/transactions";
 
 
 export interface TransactionsInput {
@@ -14,10 +14,10 @@ export interface TransactionsInput {
 }
 
 interface SearchDataInput {
-    User_Id: number;
+    Wallet_Ids?: number[];
     Type: string;
-    FromDate: Date;
-    ToDate: Date;
+    From_Date: Date;
+    To_Date: Date;
 }
 
 interface EditTransactionsInput {
@@ -36,7 +36,7 @@ export async function addTransactionsService(input: TransactionsInput) {
         throw new Error('Missing required fields');
     }
 
-    await addTransactions({
+    const result = await addTransactions({
         User_Id,
         Wallet_Id,
         Amount,
@@ -45,44 +45,24 @@ export async function addTransactionsService(input: TransactionsInput) {
         Category,
         Date,
     });
-}
-
-export async function optionsTransactionsService(Id: number) {
-    const result = await optionsTransactions(Id);
     return { result };
 }
 
+
 export async function listTransactionsService(input: SearchDataInput) {
-    const { User_Id, Type, FromDate, ToDate } = input;
-
-    if (!User_Id) {
-        throw new Error('Missing required fields');
-    }
-
-    if (!Type && !FromDate && !ToDate) {
-        const result = await listAllTransactions(User_Id);
-        return { result };
-    } else {
-        const result = await listSearchedTransactions(User_Id, Type, FromDate, ToDate);
-        return { result };
-    }
+    const result = await listTransactions(input);
+    return { result };
 }
 
-export async function editTransactionsService(input: EditTransactionsInput) {
-    const { Id, Amount, Type, Description, Category, Date } = input;
+export async function editTransactionsService(inputs: EditTransactionsInput) {
+    const { Id, Amount, Type, Description, Category, Date } = inputs;
 
     if (!Id || !Amount || !Type || !Category || !Date) {
         throw new Error('Missing required fields');
     }
 
-    await editTransactions({
-        Id,
-        Amount,
-        Type,
-        Description: Description || '',
-        Category,
-        Date,
-    });
+    const result = await editTransactions(inputs);
+    return { result };
 }
 
 export async function deleteTransactionsService(Id: number) {
