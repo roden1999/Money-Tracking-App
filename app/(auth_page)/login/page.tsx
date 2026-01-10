@@ -101,7 +101,7 @@ export default function LoginPage() {
           </button>
 
           <p className="mt-6 text-sm text-center text-gray-700">
-            Register ka muna ngani{' '}
+            Don't have account?{' '}
             <span
               onClick={() => router.push('/register')}
               className="font-semibold text-blue-600 hover:underline cursor-pointer"

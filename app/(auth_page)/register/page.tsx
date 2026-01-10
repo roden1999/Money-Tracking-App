@@ -64,7 +64,7 @@ export default function RegisterPage() {
           </h1>
 
           <p className="text-sm text-gray-600 text-center mb-6">
-            Create na para maka tagos samin mga day 1s 🚀
+            Register to login 🚀
           </p>
 
           {error && (
@@ -138,7 +138,7 @@ export default function RegisterPage() {
           </button>
 
           <p className="mt-6 text-sm text-center text-gray-700">
-            May acc ka na ba sah?{' '}
+            Already have account?{' '}
             <span
               onClick={() => router.push('/login')}
               className="font-semibold text-blue-600 hover:underline cursor-pointer"
