@@ -28,7 +28,7 @@ export default function Navbar() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
         {/* Logo */}
         <Link href="/dashboard" className="text-xl font-bold text-gray-900">
-          Youngstonna Money Tracking App
+          Money Tracking App
         </Link>
 
         {/* Menu */}
