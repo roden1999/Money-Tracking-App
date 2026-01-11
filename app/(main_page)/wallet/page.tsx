@@ -438,8 +438,36 @@ export default function WalletPage() {
 
                     {/* Empty state */}
                     {wallets?.length === 0 && (
-                        <div className="col-span-full text-center text-gray-400 py-10">
-                            No wallets found.
+                        <div className="col-span-full flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white py-14 text-center shadow-sm">
+
+                            {/* Icon */}
+                            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-blue-100">
+                                <svg
+                                    className="h-7 w-7 text-blue-600"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-2"
+                                    />
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 13h8" />
+                                </svg>
+                            </div>
+
+                            {/* Title */}
+                            <h3 className="text-lg font-semibold text-gray-800">
+                                No wallets yet
+                            </h3>
+
+                            {/* Description */}
+                            <p className="mt-1 max-w-md text-sm text-gray-500">
+                                You haven’t created any wallets yet. Add your first wallet to start tracking
+                                balances and transactions.
+                            </p>
                         </div>
                     )}
                 </div>
