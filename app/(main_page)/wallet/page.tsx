@@ -27,9 +27,11 @@ type WALLET_INPUT = {
     Date: string
 }
 
+const user = JSON.parse(localStorage.getItem("user") || "{}");
+
 const initialWalletInput: WALLET_INPUT = {
     Id: null,
-    User_Id: null,
+    User_Id: user.id,
     Name: "",
     Description: "",
     Currency: "PHP",
@@ -57,7 +59,6 @@ export default function WalletPage() {
 
     useEffect(() => {
         if (!loaded) {
-            const user = JSON.parse(localStorage.getItem("user") || "{}");
             const fetchWalletData = async () => {
                 setLoader(true);
                 setError('');
@@ -98,7 +99,6 @@ export default function WalletPage() {
             setLoader(true);
             setError('');
             try {
-                const user = JSON.parse(localStorage.getItem('user') || '{}');
                 const res = await fetch('/api/routes/wallet/options/', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -132,13 +132,6 @@ export default function WalletPage() {
         e.preventDefault();
         setLoader(true);
 
-        const user = JSON.parse(localStorage.getItem("user") || "{}");
-
-        setWalletInput(prev => ({
-            ...prev,
-            ["User_Id"]: user.id
-        }));
-        // console.log(walletInput);
         try {
             const res = await fetch('/api/routes/wallet/', {
                 method: 'POST',
@@ -189,6 +182,7 @@ export default function WalletPage() {
 
             toast.success('Wallet updated successfully!');
             setShowEditModal(false);
+            setLoaded(false);
             setWalletInput(initialWalletInput);
 
             // Refresh list
@@ -223,6 +217,7 @@ export default function WalletPage() {
 
             toast.success('Wallet deleted successfully');
             setShowDeleteModal(false);
+            setLoaded(false);
             setWalletInput(initialWalletInput);
         } catch (err: any) {
             setError(err.message || 'Something went wrong');
