@@ -202,8 +202,35 @@ export default function DashboardPage() {
                   <p className="mt-2 text-gray-500 text-sm">Loading wallets...</p>
                 </li>
               ) : walletData?.length === 0 ? (
-                <li className="flex items-center justify-center h-full text-gray-400 text-center">
-                  No wallet data available.
+                <li className="flex flex-col items-center justify-center h-full text-center bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-100 p-6">
+
+                  {/* Icon */}
+                  <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
+                    <svg
+                      className="h-5 w-5 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-2"
+                      />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 13h8" />
+                    </svg>
+                  </div>
+
+                  {/* Title */}
+                  <p className="text-sm font-semibold text-gray-800">
+                    No wallets yet
+                  </p>
+
+                  {/* Description */}
+                  <p className="mt-1 text-xs text-gray-500 max-w-[200px]">
+                    Create a wallet to start tracking your balances and transactions
+                  </p>
                 </li>
               ) : (
                 walletData.map(x => (
@@ -238,8 +265,34 @@ export default function DashboardPage() {
                   <p className="mt-2 text-gray-500 text-sm">Loading transactions...</p>
                 </div>
               ) : transactionData?.length === 0 ? (
-                <div className="flex items-center justify-center h-full text-gray-400 text-center">
-                  No transactions available.
+                <div className="h-full flex flex-col items-center justify-center text-center bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-100">
+
+                  {/* Icon */}
+                  <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
+                    <svg
+                      className="h-5 w-5 text-emerald-600"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 8v4l3 3M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+
+                  {/* Title */}
+                  <p className="text-sm font-semibold text-gray-800">
+                    No transactions yet
+                  </p>
+
+                  {/* Description */}
+                  <p className="mt-1 text-xs text-gray-500 max-w-[220px]">
+                    Your recent income and expenses will appear here once you start using your wallets
+                  </p>
                 </div>
               ) : (
                 <table className="w-full border-collapse">
