@@ -160,7 +160,6 @@ export default function TransactionsPage() {
       }
 
       const data = await res.json();
-      console.log(data);
       setTransactions(Array.isArray(data.result) ? data.result : []);
     } catch (err: any) {
       setError(err.message || 'Something went wrong');
@@ -466,8 +465,34 @@ export default function TransactionsPage() {
             <tbody>
               {transactions.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="p-4 text-center text-gray-500">
-                    No transactions found
+                  <td colSpan={6} className="p-8">
+                    <div className="flex flex-col items-center justify-center text-center">
+
+                      {/* Icon */}
+                      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
+                        <svg
+                          className="h-6 w-6 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 4v16m8-8H4"
+                          />
+                        </svg>
+                      </div>
+
+                      {/* Message */}
+                      <p className="text-sm font-medium text-gray-700">
+                        No transactions to display
+                      </p>
+                      <p className="mt-1 text-xs text-gray-400">
+                        Add a transaction or adjust your search and filters.
+                      </p>
+                    </div>
                   </td>
                 </tr>
               )}
