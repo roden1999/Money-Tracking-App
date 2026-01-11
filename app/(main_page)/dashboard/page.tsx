@@ -39,6 +39,8 @@ const TOTALS: Record<CurrencyCode, number> = {
   GBP: 0,
 };
 
+const user = JSON.parse(localStorage.getItem("user") || "{}");
+
 
 export default function DashboardPage() {
   const [walletData, setWalletData] = useState<Wallet[]>([]);
@@ -71,7 +73,6 @@ export default function DashboardPage() {
   }, [walletData]);
 
   const fetchWalletData = async () => {
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
     setLoader(true);
     setError('');
 
@@ -80,7 +81,7 @@ export default function DashboardPage() {
       const res = await fetch('/api/routes/wallet/list/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ User_Id: user.id }),
+        body: JSON.stringify({ User_Id: user.Id }),
       });
 
       if (!res.ok) {
@@ -100,8 +101,7 @@ export default function DashboardPage() {
     }
   };
 
-  const fetchTransactions = async () => {
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const fetchTransactions = async () => {    
     setLoader(true);
     setError('');
 
@@ -109,7 +109,7 @@ export default function DashboardPage() {
       const res = await fetch('/api/routes/transactions/list/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ User_Id: user.id }),
+        body: JSON.stringify({ User_Id: user.Id }),
       });
 
       if (!res.ok) {

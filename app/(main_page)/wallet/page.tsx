@@ -31,7 +31,7 @@ const user = JSON.parse(localStorage.getItem("user") || "{}");
 
 const initialWalletInput: WALLET_INPUT = {
     Id: null,
-    User_Id: user.id,
+    User_Id: user.Id,
     Name: "",
     Description: "",
     Currency: "PHP",
@@ -69,7 +69,7 @@ export default function WalletPage() {
                     const res = await fetch('/api/routes/wallet/list/', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ Ids: walletIds, User_Id: user.id }),
+                        body: JSON.stringify({ Ids: walletIds, User_Id: user.Id }),
                     });
 
                     if (!res.ok) {
@@ -102,7 +102,7 @@ export default function WalletPage() {
                 const res = await fetch('/api/routes/wallet/options/', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ Id: user.id })
+                    body: JSON.stringify({ Id: user.Id })
                 });
 
                 if (!res.ok) {

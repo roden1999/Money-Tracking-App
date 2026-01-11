@@ -30,7 +30,7 @@ const user = JSON.parse(localStorage.getItem('user') || '{}');
 const TRANSACTION_INPUT: Transaction = {
   Id: null,
   Wallet_Id: null,
-  User_Id: user.id,
+  User_Id: user.Id,
   Wallet: "",
   Amount: 0,
   Type: 'Income',
@@ -41,7 +41,7 @@ const TRANSACTION_INPUT: Transaction = {
 
 const SEARCH_DATA: Search = {
   Wallet_Ids: [],
-  User_Id: user.id,
+  User_Id: user.Id,
   From_Date: "",
   To_Date: "",
   Type: "",
@@ -114,7 +114,7 @@ export default function TransactionsPage() {
       const res = await fetch('/api/routes/wallet/options/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ Id: user.id })
+        body: JSON.stringify({ Id: user.Id })
       });
 
       if (!res.ok) {

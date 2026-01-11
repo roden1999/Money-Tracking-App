@@ -80,9 +80,12 @@ export async function loginUserService(input: LoginInput) {
   return {
     token,
     user: {
-      id: user.Id,
+      Id: user.Id,
       UserName: user.UserName,
       Email: user.Email,
+      FirstName: user.FirstName,
+      MiddleName: user.MiddleName,
+      LastName: user.LastName,
     }
   }
 }
