@@ -15,6 +15,7 @@ export interface TransactionsInput {
 
 interface SearchDataInput {
     Wallet_Ids?: number[];
+    User_Id: number;
     Type: string;
     From_Date: Date;
     To_Date: Date;
@@ -50,6 +51,12 @@ export async function addTransactionsService(input: TransactionsInput) {
 
 
 export async function listTransactionsService(input: SearchDataInput) {
+    const { User_Id } = input;
+
+    if (!User_Id) {
+        throw new Error('User Id isrequired!');
+    }
+    
     const result = await listTransactions(input);
     return { result };
 }

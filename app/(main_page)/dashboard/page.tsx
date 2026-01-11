@@ -101,6 +101,7 @@ export default function DashboardPage() {
   };
 
   const fetchTransactions = async () => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
     setLoader(true);
     setError('');
 
@@ -108,7 +109,7 @@ export default function DashboardPage() {
       const res = await fetch('/api/routes/transactions/list/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
+        body: JSON.stringify({ User_Id: user.id }),
       });
 
       if (!res.ok) {

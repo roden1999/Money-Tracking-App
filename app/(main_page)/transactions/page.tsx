@@ -19,6 +19,7 @@ interface Transaction {
 
 interface Search {
   Wallet_Ids: number[] | null;
+  User_Id: number | null;
   From_Date: string;
   To_Date: string;
   Type: string;
@@ -36,8 +37,10 @@ const TRANSACTION_INPUT: Transaction = {
   Date: ""
 }
 
+const user = JSON.parse(localStorage.getItem('user') || '{}');
 const SEARCH_DATA: Search = {
   Wallet_Ids: [],
+  User_Id: user.id,
   From_Date: "",
   To_Date: "",
   Type: "",
@@ -95,6 +98,7 @@ export default function TransactionsPage() {
 
   const typeOptions = ['Income', 'Expenses'];
 
+
   useEffect(() => {
     if (!loaded) {
       fetchTransactions();
@@ -137,8 +141,6 @@ export default function TransactionsPage() {
   const fetchTransactions = async () => {
     setLoader(true);
     setError('');
-
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     // Validate dates
     if (searchInput.From_Date && searchInput.To_Date && new Date(searchInput.From_Date) < new Date(searchInput.To_Date)) {
@@ -471,7 +473,7 @@ export default function TransactionsPage() {
                       {/* Icon */}
                       <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
                         <svg
-                          className="h-6 w-6 text-gray-400"
+                          className="h-5 w-5 text-emerald-600"
                           fill="none"
                           stroke="currentColor"
                           strokeWidth="2"
@@ -480,7 +482,7 @@ export default function TransactionsPage() {
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            d="M12 4v16m8-8H4"
+                            d="M12 8v4l3 3M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                           />
                         </svg>
                       </div>
