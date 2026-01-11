@@ -25,10 +25,12 @@ interface Search {
   Type: string;
 }
 
+const user = JSON.parse(localStorage.getItem('user') || '{}');
+
 const TRANSACTION_INPUT: Transaction = {
   Id: null,
   Wallet_Id: null,
-  User_Id: null,
+  User_Id: user.id,
   Wallet: "",
   Amount: 0,
   Type: 'Income',
@@ -37,7 +39,6 @@ const TRANSACTION_INPUT: Transaction = {
   Date: ""
 }
 
-const user = JSON.parse(localStorage.getItem('user') || '{}');
 const SEARCH_DATA: Search = {
   Wallet_Ids: [],
   User_Id: user.id,
@@ -110,7 +111,6 @@ export default function TransactionsPage() {
     setLoader(true);
     setError('');
     try {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
       const res = await fetch('/api/routes/wallet/options/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -174,12 +174,6 @@ export default function TransactionsPage() {
     e.preventDefault();
     setLoader(true);
 
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    setTransacInput(prev => ({
-      ...prev,
-      ["User_Id"]: user.id
-    }));
-    console.log(user);
     try {
       const res = await fetch('/api/routes/transactions/', {
         method: 'POST',
@@ -199,6 +193,7 @@ export default function TransactionsPage() {
 
       toast.success('Transaction added successfully!');
       setShowModal(false);
+      setLoaded(false);
       setTransacInput(TRANSACTION_INPUT);
       setError('');
     } catch {
@@ -210,13 +205,8 @@ export default function TransactionsPage() {
 
   const handleEditTransactions = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setLoader(true);
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    setTransacInput(prev => ({
-      ...prev,
-      ["User_Id"]: user.id
-    }));
+
     try {
       const res = await fetch('/api/routes/transactions/', {
         method: 'PUT',
@@ -234,6 +224,7 @@ export default function TransactionsPage() {
 
       toast.success('Transaction updated successfully!');
       setShowEditModal(false);
+      setLoaded(false);
       setTransacInput(TRANSACTION_INPUT);
       setError('');
     } catch {
@@ -245,13 +236,8 @@ export default function TransactionsPage() {
 
   const handleDeleteTransactions = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setLoader(true);
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    setTransacInput(prev => ({
-      ...prev,
-      ["User_Id"]: user.id
-    }));
+
     try {
       const res = await fetch('/api/routes/transactions/', {
         method: 'DELETE',
@@ -269,6 +255,7 @@ export default function TransactionsPage() {
 
       toast.success('Transaction added successfully!');
       setShowDeleteModal(false);
+      setLoaded(false);
       setTransacInput(TRANSACTION_INPUT);
       setError('');
     } catch {
@@ -328,10 +315,9 @@ export default function TransactionsPage() {
 
   const handleSearchWallet = (e: MultiValue<{ value: number; label: string }>) => {
     setSelectedWallet(e);
-    const walletIds = selectedWallets.map((x) => x.value);
     setSearchInput(prev => ({
       ...prev,
-      ["Wallet_Ids"]: walletIds
+      ["Wallet_Ids"]: e.map(x => x.value)
     }));
     setLoaded(false);
   }
