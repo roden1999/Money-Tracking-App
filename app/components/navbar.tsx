@@ -39,11 +39,10 @@ export default function Navbar() {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`text-sm font-medium transition ${
-                  isActive
-                    ? "text-blue-600"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
+                className={`text-sm font-medium transition ${isActive
+                  ? "text-blue-600"
+                  : "text-gray-600 hover:text-gray-900"
+                  }`}
               >
                 {item.name}
               </Link>
@@ -71,14 +70,63 @@ export default function Navbar() {
             {open && (
               <div
                 onMouseLeave={() => setOpen(false)}
-                className="absolute right-0 mt-2 w-40 rounded-lg border bg-white shadow-lg"
-              >
-                <button
-                  onClick={handleLogout}
-                  className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 rounded-lg"
-                >
-                  Logout
-                </button>
+                className="absolute right-0 mt-2 w-44 rounded-xl bg-white shadow-lg ring-1 ring-black/5 x">
+                <ul className="py-1 text-sm">
+
+                  {/* Profile */}
+                  <li>
+                    <button
+                      onClick={() => router.replace("/profile")}
+                      className="flex w-full items-center gap-2 px-4 py-2 text-gray-700 transition hover:bg-gray-100 hover:text-gray-900"
+                    >
+                      {/* Profile icon */}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5.121 17.804A9 9 0 1118.9 17.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                      Profile
+                    </button>
+                  </li>
+
+                  {/* Divider */}
+                  <li className="my-1 border-t border-gray-200" />
+
+                  {/* Logout */}
+                  <li>
+                    <button
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-2 px-4 py-2 text-red-600 transition hover:bg-red-50 hover:text-red-700"
+                    >
+                      {/* Logout icon */}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"
+                        />
+                      </svg>
+                      Logout
+                    </button>
+                  </li>
+
+                </ul>
               </div>
             )}
           </div>
