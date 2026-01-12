@@ -315,7 +315,7 @@ export default function DashboardPage() {
                         <td className="py-3 text-gray-700">{tx.Description}</td>
                         <td className="py-3 text-sm text-gray-500">{new Date(tx.Date).toLocaleDateString()}</td>
                         <td
-                          className={`py-3 text-right font-semibold ${tx.Amount < 0 ? 'text-red-600' : 'text-green-600'}`}
+                          className={`py-3 text-right font-semibold ${tx.Type === 'Expense' ? 'text-red-600' : 'text-green-600'}`}
                         >
                           {tx.Type === 'Expense' ? '-' : '+'}
                           {tx.Amount.toFixed(2)}
