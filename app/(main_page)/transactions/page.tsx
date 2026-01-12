@@ -97,7 +97,7 @@ export default function TransactionsPage() {
   const [toDate, setToDate] = useState('');
   const [typeFilter, setTypeFilter] = useState<'Income' | 'Expense' | ''>('');
 
-  const typeOptions = ['Income', 'Expenses'];
+  const typeOptions = ['Income', 'Expense'];
 
 
   useEffect(() => {
