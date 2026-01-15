@@ -1,5 +1,5 @@
-import sql from 'mssql';
 import { connectToDB } from '../../lib/db';
+import { supabase } from '../../lib/supabase';
 
 export interface Wallet {
     Id: number | null;
@@ -17,64 +17,82 @@ interface SearchedData {
     User_Id: number;
 }
 
+const USE_SUPABASE = true; // default MSSQL, set to true to switch to Supabase
+
 // Add wallet
 export async function addWallet(wallet: Omit<Wallet, 'Id' | 'IsDeleted'>): Promise<void> {
-    const pool = await connectToDB();
-    await pool
-        .request()
-        .input('json_data', JSON.stringify(wallet))
-        // .input('User_Id', wallet.User_Id)
-        // .input('Name', wallet.Name)
-        // .input('Description', wallet.Description)
-        // .input('Currency', wallet.Currency)
-        // .input('Balance', wallet.Balance)
-        // .input('Date', wallet.Date)
-        .execute('[post_wallet]')
-    //     .query(
-    //         `INSERT INTO Wallets (User_Id, Name, Description, Currency, Balance, Date, IsDeleted)
-    //    VALUES (@User_Id, @Name, @Description, @Currency, @Balance, @Date, 0)`
-    //     );
+    if (!USE_SUPABASE) {
+        const pool = await connectToDB();
+        await pool
+            .request()
+            .input('json_data', JSON.stringify(wallet))
+            .execute('[post_wallet]');
+    } else {
+        const { error } = await supabase.rpc('post_wallet', { json_data: wallet });
+        if (error) throw error;
+    }
 }
 
-// Options for reactselect
+// Options for react-select
 export async function optionsWallet(Id: number) {
-    const pool = await connectToDB();
-    const result = await pool
-        .request()
-        .input('Id', Id)
-        .query<Wallet>(
-            `SELECT * FROM Wallets WHERE User_Id = @Id AND IsDeleted = 0`
-        );
-
-    return result.recordset;
+    if (!USE_SUPABASE) {
+        const pool = await connectToDB();
+        const result = await pool
+            .request()
+            .input('Id', Id)
+            .query<Wallet>(`SELECT * FROM Wallets WHERE User_Id = @Id AND IsDeleted = 0`);
+        return result.recordset;
+    } else {
+        const { data, error } = await supabase
+            .from('Wallets')
+            .select('*')
+            .eq('User_Id', Id)
+            .eq('IsDeleted', false);
+        if (error) throw error;
+        return data;
+    }
 }
 
-// List wallet
+// List wallets
 export async function listWallet(data: SearchedData) {
-    const pool = await connectToDB();
-   
-    const result = await pool
-        .request()
-        .input('json_data', JSON.stringify(data))
-        .execute('[get_wallets]');
-  
-    return result.recordset;
+    if (!USE_SUPABASE) {
+        const pool = await connectToDB();
+        const result = await pool
+            .request()
+            .input('json_data', JSON.stringify(data))
+            .execute('[get_wallets]');
+        return result.recordset;
+    } else {
+        const { data: wallets, error } = await supabase.rpc('get_wallets', { json_data: data });
+        if (error) throw error;
+        return wallets;
+    }
 }
 
-// Edit Wallet
+// Edit wallet
 export async function editWallet(wallet: Omit<Wallet, 'Date' | 'IsDeleted'>): Promise<void> {
-    const pool = await connectToDB();
-    await pool
-        .request()
-        .input('json_data', JSON.stringify(wallet))
-        .execute('[post_wallet]');
+    if (!USE_SUPABASE) {
+        const pool = await connectToDB();
+        await pool
+            .request()
+            .input('json_data', JSON.stringify(wallet))
+            .execute('[post_wallet]');
+    } else {
+        const { error } = await supabase.rpc('post_wallet', { json_data: wallet });
+        if (error) throw error;
+    }
 }
 
-// Delete Wallet
+// Delete wallet
 export async function deleteWallet(Id: number) {
-    const pool = await connectToDB();
-    await pool
-        .request()
-        .input('Id', Id)
-        .execute('[delete_wallet]');
+    if (!USE_SUPABASE) {
+        const pool = await connectToDB();
+        await pool
+            .request()
+            .input('Id', Id)
+            .execute('[delete_wallet]');
+    } else {
+        const { error } = await supabase.rpc('delete_wallet', { "p_wallet_id": Id });
+        if (error) throw error;
+    }
 }
