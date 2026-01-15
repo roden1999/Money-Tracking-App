@@ -41,6 +41,14 @@ const TOTALS: Record<CurrencyCode, number> = {
 
 const user = JSON.parse(localStorage.getItem("user") || "{}");
 
+const SEARCH_DATA = {
+  Wallet_Ids: [],
+  User_Id: user.Id,
+  From_Date: "",
+  To_Date: "",
+  Type: "",
+}
+
 
 export default function DashboardPage() {
   const [walletData, setWalletData] = useState<Wallet[]>([]);
@@ -109,7 +117,7 @@ export default function DashboardPage() {
       const res = await fetch('/api/routes/transactions/list/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ User_Id: user.Id }),
+        body: JSON.stringify(SEARCH_DATA),
       });
 
       if (!res.ok) {
@@ -118,6 +126,7 @@ export default function DashboardPage() {
       }
 
       const data = await res.json();
+      console.log("Transactions: ", data.result)
       setTransactionData(Array.isArray(data.result) ? data.result : []);
     } catch (err: any) {
       setError(err.message || 'Something went wrong');
