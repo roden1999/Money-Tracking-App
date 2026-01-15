@@ -24,3 +24,179 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ===============================
+   PrimeDock – Stable Hover Behavior
+   =============================== */
+
+.p-dock {
+  pointer-events: auto;
+  padding: 0.5rem;
+  border-radius: 0.75rem;
+}
+
+/* Dock container */
+.p-dock-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  /* Visibility on white backgrounds */
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.15),
+    0 2px 6px rgba(0, 0, 0, 0.08);
+
+  border-radius: 1.25rem;
+  backdrop-filter: blur(10px);
+
+  /* Spacing */
+  padding: 0.75rem;
+  gap: 1rem;
+
+  /* Smooth expansion */
+  transition:
+    padding 0.3s ease,
+    gap 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+/* Expand taskbar on hover */
+.p-dock:hover .p-dock-list {
+  padding: 1.25rem;
+  gap: 1.5rem;
+  box-shadow:
+    0 16px 32px rgba(0, 0, 0, 0.2),
+    0 6px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* Individual dock items */
+.p-dock-item {
+  background: none;
+  transform-origin: center;
+  transition:
+    transform 0.25s ease,
+    margin 0.25s ease;
+}
+
+/* Main hovered icon */
+.p-dock-item:hover {
+  transform: scale(1.4);
+  margin: 0.5rem 0;
+  z-index: 10;
+}
+
+/* Neighbor scaling (macOS-like) */
+.p-dock-item:hover+.p-dock-item,
+.p-dock-item:has(+ .p-dock-item:hover) {
+  transform: scale(1.2);
+}
+
+/* Keep others stable */
+.p-dock:hover .p-dock-item:not(:hover) {
+  transform: scale(1);
+}
+
+/* Click area cleanup */
+.p-dock-action {
+  background: transparent !important;
+}
+
+/* =========================================
+   PrimeReact Dialog – Global Design Upgrade
+   ========================================= */
+
+/* Dialog container */
+.p-dialog {
+  border-radius: 1rem !important;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.2),
+    0 8px 16px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont;
+}
+
+/* Header */
+.p-dialog-header {
+  padding: 1.25rem 1.5rem !important;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  /* slate-200 */
+}
+
+.p-dialog-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #0f172a;
+  /* slate-900 */
+}
+
+/* Content */
+.p-dialog-content {
+  padding: 1.5rem !important;
+  background: #ffffff;
+  color: #334155;
+  /* slate-700 */
+  line-height: 1.65;
+}
+
+/* Improve default typography inside dialog */
+.p-dialog-content p {
+  margin-bottom: 0.75rem;
+}
+
+.p-dialog-content h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+}
+
+.p-dialog-content h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #64748b;
+  /* slate-500 */
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.p-dialog-content ul {
+  padding-left: 1.25rem;
+  margin-top: 0.5rem;
+}
+
+.p-dialog-content li {
+  margin-bottom: 0.25rem;
+}
+
+/* Footer / actions */
+.p-dialog-footer {
+  padding: 1rem 1.5rem !important;
+  border-top: 1px solid #e5e7eb;
+  background: #ffffff;
+}
+
+/* Close icon */
+.p-dialog-header-icon {
+  color: #475569;
+  /* slate-600 */
+}
+
+.p-dialog-header-icon:hover {
+  color: #0f172a;
+}
+
+/* Mobile improvements */
+@media (max-width: 640px) {
+  .p-dialog {
+    border-radius: 0.75rem !important;
+  }
+
+  .p-dialog-content {
+    padding: 1.25rem !important;
+  }
+}
